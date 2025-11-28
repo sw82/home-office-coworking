@@ -4,17 +4,13 @@
 -- Users Table
 create table public.users (
   id uuid references auth.users not null primary key,
-  linkedin_id text unique,
-  email text unique,
-  full_name text,
-  avatar_url text,
-  headline text,
-  bio text,
+  linkedin_profile jsonb, -- { name, photo, headline, company }
   zipcode text,
   -- Approximate location (lat/long)
   latitude double precision,
   longitude double precision,
-  amenities jsonb default '[]'::jsonb,
+  bio text,
+  amenities jsonb default '[]'::jsonb, -- ["wifi_5g", "coffee_machine", "standing_desk"]
   trust_score int default 0,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -35,13 +31,11 @@ create table public.bookings (
   host_id uuid references public.users(id) not null,
   guest_id uuid references public.users(id) not null,
   status text check (status in ('pending', 'accepted', 'rejected', 'completed')) default 'pending',
-  scheduled_date date not null,
-  start_time time not null,
-  end_time time not null,
+  scheduled_at timestamp with time zone not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- RLS Policies (Draft)
+-- RLS Policies
 alter table public.users enable row level security;
 alter table public.availability enable row level security;
 alter table public.bookings enable row level security;
